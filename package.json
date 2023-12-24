@@ -1,0 +1,19 @@
+{
+  "name": "nodejs-programmatic-renamers",
+  "version": "1.0.0",
+  "description": "Two programmatic renamers build on node js, 1.Bulk_Renamer,  2.sequential_file_renamer",
+  "main": "change-file_names.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Faisal-Mujtaba-Saleem",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Faisal-Mujtaba-Saleem/node.js-programmatic-renamers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Faisal-Mujtaba-Saleem/node.js-programmatic-renamers/issues"
+  },
+  "homepage": "https://github.com/Faisal-Mujtaba-Saleem/node.js-programmatic-renamers#readme"
+}
