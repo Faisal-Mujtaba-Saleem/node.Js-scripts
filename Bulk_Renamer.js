@@ -8,7 +8,7 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-function questionAsync(query, rl) {
+function questionAsync(query) {
     return new Promise((resolve) => {
         rl.question(query, (answer) => {
             resolve(answer);
@@ -16,16 +16,16 @@ function questionAsync(query, rl) {
     });
 }
 
-function promptForChoice(question, rl) {
+function promptForChoice(query) {
     return new Promise((resolve) => {
         function ask() {
-            rl.question(question, (answer) => {
+            rl.question(query, (answer) => {
                 const lowerCaseAnswer = answer.toLowerCase().trim();
 
-                if (lowerCaseAnswer === 'extension' || lowerCaseAnswer === 'common text') {
+                if (lowerCaseAnswer === 'extname' || lowerCaseAnswer === 'common text') {
                     resolve(lowerCaseAnswer);
                 } else {
-                    console.log('Please enter either "extension" or "common text".');
+                    console.log('Please enter either "extname" or "common text".');
                     ask();
                 }
             });
@@ -35,10 +35,10 @@ function promptForChoice(question, rl) {
     });
 }
 
-function promptForBoolean(question, rl) {
+function promptForBoolean(query) {
     return new Promise((resolve) => {
         function ask() {
-            rl.question(question, (answer) => {
+            rl.question(query, (answer) => {
                 const lowerCaseAnswer = answer.toLowerCase().trim();
 
                 if (lowerCaseAnswer === 'true' || lowerCaseAnswer === 'false') {
@@ -56,66 +56,74 @@ function promptForBoolean(question, rl) {
 
 async function main() {
     try {
-        const renameableFilesDirPath = await questionAsync('Enter the directory path in which you want to change the files names: ', rl);
+        const renameableFilesDirPath = await questionAsync('\nEnter the directory path in which you want to change the files names: ');
         console.log(`Your renameable files directory path: ${renameableFilesDirPath}`);
 
         const renameableFilesDirectory = fs.readdirSync(renameableFilesDirPath, 'utf-8');
 
-        const renameMethod = await promptForChoice('Enter whether you want to choose the renameable files via extension name or via any common text in filenames: ', rl);
+        const renameMethod = await promptForChoice('\nEnter whether you want to choose the renameable files via extname or via any common text in filenames: ');
         console.log(`You choose, rename via ${renameMethod}`);
 
-        let extension_nameInput;
+        let extnameInput;
         let commonFilesNameText;
         (renameMethod === 'extension') ?
-            extension_nameInput = await questionAsync('Enter the the filename extension of the files which you want to rename: ', rl) :
-            commonFilesNameText = await questionAsync('Enter the the common text in the files names which you want to rename: ', rl);
-
-        const filenameInput = await questionAsync('Enter the new filename and if you want to change the extension name too then attach it with filename: ', rl);
-        console.log(`You choosed new filename as: ${filenameInput}`);
-
-        const changeExtension_Name = path.extname(filenameInput) !== '' && await promptForBoolean('Enter true or false if you want to change the extension name too: ', rl);
-        console.log(`Change Extname: ${changeExtension_Name}`);
-
-        const directoryToPut = await questionAsync('Enter the directory path in which you want to put your renamed files: ', rl);
-        console.log(`Renamed file's directory: ${directoryToPut}`);
+            extnameInput = await questionAsync('\nEnter the the filename extension of the files which you want to rename: ') :
+            commonFilesNameText = await questionAsync('\nEnter the the common text in the files names which you want to rename: ');
 
         const renameableFiles = [];
         for (let i = 0; i < renameableFilesDirectory.length; i++) {
             const file = renameableFilesDirectory[i];
 
             if (renameMethod === 'extension') {
-                if (path.extname(file) === extension_nameInput) {
+                if (path.extname(file) === extnameInput) {
                     renameableFiles.push(file);
+                } else {
+                    console.log(`File ${file}'s extname ${path.extname(file)} does'nt match the extname ${extnameInput}`);
                 }
             } else {
                 if (file.includes(commonFilesNameText)) {
                     renameableFiles.push(file);
+                } else {
+                    console.log(`File ${file}'s filename does'nt find any match with ${commonFilesNameText}`);
                 }
             }
         }
 
         if (renameableFiles.length !== 0) {
+            const filenameInput = await questionAsync('\nEnter the new filename and if you want to change the extname too then attach it along with filename: ');
+            console.log(`You choosed new filename as: ${filenameInput}`);
+
+            const changeExtname = path.extname(filenameInput) !== '' && await promptForBoolean('\nEnter true or false if you want to change the extname too: ');
+            console.log(`Change Extname: ${changeExtname}`);
+
+            const directoryToPut = await questionAsync('\nEnter the directory path in which you want to put your renamed files: ');
+            console.log(`Directory to put in your renameable files : ${directoryToPut}`);
+
             for (let i = 0; i < renameableFiles.length; i++) {
                 const file = renameableFiles[i];
                 try {
                     if (path.extname(filenameInput) !== '') {
-                        changeExtension_Name ?
+                        changeExtname ?
                             fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i !== 0 ? i : ''}${path.parse(filenameInput).ext}`)) :
                             fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i !== 0 ? i : ''}${path.extname(file)}`));
-                        console.log('Happy Bulk Renaming');
-                        console.log(`Successfully renamed your file${(renameableFiles.length > 1) ? 's' : ''}`);
+
+                        console.log(`\nFile ${file}'s name renamed successfully!`);
                     }
                     else {
                         fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i !== 0 ? i : ''}${path.extname(file)}`));
-                        console.log('Happy Bulk Renaming');
-                        console.log(`Successfully renamed your file${(renameableFiles.length > 1) ? 's' : ''}`);
+
+                        console.log(`\nFile ${file}'s name renamed successfully!`);
                     }
                 } catch (error) {
                     console.log(error.message);
+                } finally {
+                    // Close the readline interface after the loop
+                    rl.close();
                 }
             }
         } else {
-            console.log('No files to rename.');
+            rl.close();
+            console.log('\nNo files to rename.\n');
         }
     } catch (error) {
         console.log(error.message);
