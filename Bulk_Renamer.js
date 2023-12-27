@@ -66,7 +66,7 @@ async function main() {
 
         let extnameInput;
         let commonFilesNameText;
-        (renameMethod === 'extension') ?
+        (renameMethod === 'extname') ?
             extnameInput = await questionAsync('\nEnter the the filename extension of the files which you want to rename: ') :
             commonFilesNameText = await questionAsync('\nEnter the the common text in the files names which you want to rename: ');
 
@@ -74,7 +74,7 @@ async function main() {
         for (let i = 0; i < renameableFilesDirectory.length; i++) {
             const file = renameableFilesDirectory[i];
 
-            if (renameMethod === 'extension') {
+            if (renameMethod === 'extname') {
                 if (path.extname(file) === extnameInput) {
                     renameableFiles.push(file);
                 } else {
@@ -104,13 +104,13 @@ async function main() {
                 try {
                     if (path.extname(filenameInput) !== '') {
                         changeExtname ?
-                            fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i !== 0 ? i : ''}${path.parse(filenameInput).ext}`)) :
-                            fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i !== 0 ? i : ''}${path.extname(file)}`));
+                            fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i + 1}${path.parse(filenameInput).ext}`)) :
+                            fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i + 1}${path.extname(file)}`));
 
                         console.log(`\nFile ${file}'s name renamed successfully!`);
                     }
                     else {
-                        fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i !== 0 ? i : ''}${path.extname(file)}`));
+                        fs.renameSync(path.join(renameableFilesDirPath, file), path.join(directoryToPut, `${path.parse(filenameInput).name}${i + 1}${path.extname(file)}`));
 
                         console.log(`\nFile ${file}'s name renamed successfully!`);
                     }
